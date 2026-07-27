@@ -53,7 +53,21 @@ export class AppComponent implements OnInit, OnDestroy {
   ];
 
   private readonly STORAGE_KEY = 'interview-prep-tracker';
+  private readonly DAYS_TRACKER_KEY = 'interview-prep-days';
   private scrollHandler: (() => void) | null = null;
+
+  // Days tracker
+  startDate = signal<string>('');
+  totalDays = signal<number>(90);
+  daysElapsed = computed(() => {
+    const start = this.startDate();
+    if (!start) return 0;
+    const diff = Date.now() - new Date(start).getTime();
+    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  });
+  daysRemaining = computed(() => Math.max(0, this.totalDays() - this.daysElapsed()));
+  daysProgress = computed(() => Math.min(100, Math.round((this.daysElapsed() / this.totalDays()) * 100)));
+  showDaysSettings = signal<boolean>(false);
 
   selectedDoc = signal<DocItem | null>(null);
   rawContent = signal<string>('');
@@ -91,6 +105,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadTracker();
+    this.loadDaysTracker();
   }
 
   ngOnDestroy(): void {
@@ -245,6 +260,34 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private saveTracker(): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tracker()));
+  }
+
+  toggleDaysSettings(): void {
+    this.showDaysSettings.set(!this.showDaysSettings());
+  }
+
+  saveDaysSettings(startDate: string, totalDays: number): void {
+    this.startDate.set(startDate);
+    this.totalDays.set(totalDays);
+    this.showDaysSettings.set(false);
+    localStorage.setItem(this.DAYS_TRACKER_KEY, JSON.stringify({ startDate, totalDays }));
+  }
+
+  private loadDaysTracker(): void {
+    try {
+      const stored = localStorage.getItem(this.DAYS_TRACKER_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        this.startDate.set(data.startDate || '');
+        this.totalDays.set(data.totalDays || 90);
+      } else {
+        // Default: started 10 days ago, 90 total days
+        const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        this.startDate.set(tenDaysAgo);
+        this.totalDays.set(90);
+        this.saveDaysSettings(tenDaysAgo, 90);
+      }
+    } catch {}
   }
 
   private renderMarkdown(content: string): void {

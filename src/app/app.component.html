@@ -24,9 +24,39 @@
           </div>
         </div>
         <!-- Progress bar inside hero -->
-        <div class="hero-progress">
-          <div class="hero-progress-fill" [style.width.%]="overallProgress()"></div>
+        <div class="hero-bottom">
+          <div class="days-tracker">
+            <div class="days-info" (click)="toggleDaysSettings()">
+              <span class="days-elapsed">📅 Day {{ daysElapsed() }}</span>
+              <span class="days-separator">|</span>
+              <span class="days-remaining">{{ daysRemaining() }} days left</span>
+            </div>
+            <div class="days-bar">
+              <div class="days-bar-fill" [style.width.%]="daysProgress()"
+                [class.warning]="daysProgress() > 70"
+                [class.danger]="daysProgress() > 90"></div>
+            </div>
+          </div>
+          <div class="hero-progress">
+            <div class="hero-progress-fill" [style.width.%]="overallProgress()"></div>
+          </div>
         </div>
+
+        <!-- Days Settings Modal -->
+        @if (showDaysSettings()) {
+          <div class="days-settings-overlay" (click)="toggleDaysSettings()">
+            <div class="days-settings" (click)="$event.stopPropagation()">
+              <h3>⚙️ Days Tracker Settings</h3>
+              <label>Start Date
+                <input type="date" #startInput [value]="startDate()" />
+              </label>
+              <label>Total Days
+                <input type="number" #totalInput [value]="totalDays()" min="1" max="365" />
+              </label>
+              <button class="save-btn" (click)="saveDaysSettings(startInput.value, +totalInput.value)">Save</button>
+            </div>
+          </div>
+        }
       </div>
     </header>
 
