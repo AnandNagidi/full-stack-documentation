@@ -23,6 +23,204 @@ To provide a reliable, scalable, and secure platform for storing structured data
 - **Concurrency**: Multiple users accessing same data without conflicts
 - **Performance at scale**: Indexing, query optimization, and partitioning for billions of rows
 
+---
+
+## 2. SQL Basics — Foundation Concepts
+
+### Database Objects
+
+| Object | Definition | Example |
+|--------|-----------|---------|
+| Table | Collection of rows and columns storing data | `Orders`, `Customers` |
+| View | Virtual table defined by a query (no storage) | `vw_ActiveOrders` |
+| Stored Procedure | Precompiled SQL code block | `sp_GetOrdersByDate` |
+| Function | Returns a value (scalar) or table (TVF) | `fn_CalculateTax` |
+| Index | Data structure for fast lookups | `IX_Orders_CustomerId` |
+| Trigger | Auto-executes on INSERT/UPDATE/DELETE | `tr_AuditChanges` |
+| Constraint | Rule enforcing data integrity | `PK_Orders`, `FK_Orders_Customer` |
+
+### Data Types Quick Reference
+
+| Category | Types | When to Use |
+|----------|-------|-------------|
+| Integer | `int`, `bigint`, `smallint`, `tinyint` | Counters, IDs, quantities |
+| Decimal | `decimal(p,s)`, `money` | Financial data (never use float!) |
+| String | `varchar(n)`, `nvarchar(n)`, `char(n)` | Text data |
+| Date/Time | `date`, `datetime2`, `datetimeoffset` | Timestamps (use `datetime2`) |
+| Binary | `varbinary(max)`, `image` | Files, BLOBs |
+| Boolean | `bit` | True/false flags |
+| Unique ID | `uniqueidentifier` | GUIDs |
+
+### CRUD Operations
+
+```sql
+-- CREATE (INSERT)
+INSERT INTO Customers (Name, Email, CreatedAt)
+VALUES ('John Doe', 'john@example.com', GETDATE());
+
+-- INSERT multiple rows
+INSERT INTO Orders (CustomerId, Total, Status)
+VALUES (1, 250.00, 'Pending'),
+       (2, 180.50, 'Pending'),
+       (3, 420.00, 'Confirmed');
+
+-- READ (SELECT)
+SELECT c.Name, o.Total, o.Status
+FROM Customers c
+INNER JOIN Orders o ON o.CustomerId = c.Id
+WHERE o.Status = 'Pending'
+ORDER BY o.Total DESC;
+
+-- UPDATE
+UPDATE Orders
+SET Status = 'Shipped', ShippedDate = GETDATE()
+WHERE OrderId = 123 AND Status = 'Confirmed';
+
+-- DELETE (be careful!)
+DELETE FROM Orders
+WHERE Status = 'Cancelled' AND CreatedAt < DATEADD(YEAR, -1, GETDATE());
+```
+
+### JOINs — Combining Tables
+
+```
+INNER JOIN: Only matching rows from BOTH tables
+LEFT JOIN:  ALL rows from left + matching from right (NULL if no match)
+RIGHT JOIN: ALL rows from right + matching from left
+FULL JOIN:  ALL rows from both (NULL where no match)
+CROSS JOIN: Cartesian product (every row × every row)
+
+Visual:
+    Table A        INNER JOIN      Table B
+  ┌─────────┐    ┌─────────┐    ┌─────────┐
+  │ A only  │    │  A ∩ B  │    │ B only  │
+  └─────────┘    └─────────┘    └─────────┘
+  
+  LEFT JOIN = A only + A∩B (+ NULLs for B)
+  RIGHT JOIN = A∩B + B only (+ NULLs for A)
+  FULL JOIN = A only + A∩B + B only
+```
+
+```sql
+-- Common interview question: Find customers with NO orders
+SELECT c.*
+FROM Customers c
+LEFT JOIN Orders o ON o.CustomerId = c.Id
+WHERE o.Id IS NULL;  -- NULL means no match found
+
+-- Self-join: Find employees and their managers
+SELECT e.Name AS Employee, m.Name AS Manager
+FROM Employees e
+LEFT JOIN Employees m ON e.ManagerId = m.EmployeeId;
+```
+
+### GROUP BY and Aggregations
+
+```sql
+-- Definition: GROUP BY collapses rows into groups based on column values
+-- Aggregate functions: COUNT, SUM, AVG, MIN, MAX
+
+-- Revenue per customer
+SELECT c.Name, COUNT(o.Id) AS OrderCount, SUM(o.Total) AS TotalSpent
+FROM Customers c
+JOIN Orders o ON o.CustomerId = c.Id
+GROUP BY c.Name
+HAVING SUM(o.Total) > 1000  -- Filter AFTER aggregation
+ORDER BY TotalSpent DESC;
+
+-- WHERE vs HAVING:
+-- WHERE filters individual rows BEFORE grouping
+-- HAVING filters groups AFTER aggregation
+```
+
+### Subqueries and Common Patterns
+
+```sql
+-- Correlated subquery: References outer query (runs per row)
+SELECT o.*
+FROM Orders o
+WHERE o.Total > (
+    SELECT AVG(Total) FROM Orders WHERE CustomerId = o.CustomerId
+);
+-- "Orders above that customer's average"
+
+-- EXISTS (more efficient than IN for large datasets)
+SELECT c.* FROM Customers c
+WHERE EXISTS (
+    SELECT 1 FROM Orders o WHERE o.CustomerId = c.Id AND o.Total > 500
+);
+
+-- Derived table (inline subquery in FROM)
+SELECT TopCustomers.Name, TopCustomers.TotalSpent
+FROM (
+    SELECT c.Name, SUM(o.Total) AS TotalSpent
+    FROM Customers c JOIN Orders o ON o.CustomerId = c.Id
+    GROUP BY c.Name
+) AS TopCustomers
+WHERE TopCustomers.TotalSpent > 10000;
+```
+
+### CASE Expressions
+
+```sql
+-- Definition: SQL's version of if-else, used in SELECT, WHERE, ORDER BY
+
+SELECT 
+    Name,
+    Total,
+    CASE
+        WHEN Total >= 1000 THEN 'Premium'
+        WHEN Total >= 500 THEN 'Standard'
+        WHEN Total >= 100 THEN 'Basic'
+        ELSE 'Micro'
+    END AS OrderTier
+FROM Orders;
+
+-- CASE in UPDATE
+UPDATE Orders
+SET Priority = CASE
+    WHEN Total > 1000 AND Status = 'Pending' THEN 'High'
+    WHEN DueDate < GETDATE() THEN 'Urgent'
+    ELSE 'Normal'
+END;
+```
+
+### String Functions
+
+```sql
+-- Common string operations
+SELECT
+    LEN('Hello')           AS Length,         -- 5
+    UPPER('hello')         AS Upper,          -- HELLO
+    LOWER('HELLO')         AS Lower,          -- hello
+    TRIM('  hello  ')      AS Trimmed,        -- hello
+    LEFT('Hello', 3)       AS LeftThree,      -- Hel
+    RIGHT('Hello', 2)      AS RightTwo,       -- lo
+    SUBSTRING('Hello', 2, 3) AS Sub,          -- ell
+    REPLACE('Hello', 'l', 'L') AS Replaced,   -- HeLLo
+    CHARINDEX('lo', 'Hello') AS Position,     -- 4
+    CONCAT(FirstName, ' ', LastName) AS FullName,
+    STRING_AGG(Name, ', ') AS CommaSeparated; -- SQL 2017+
+```
+
+### Date Functions
+
+```sql
+-- Date operations
+SELECT
+    GETDATE()              AS Now,
+    GETUTCDATE()           AS UtcNow,
+    DATEADD(DAY, 7, GETDATE())  AS NextWeek,
+    DATEDIFF(DAY, OrderDate, ShipDate) AS DaysToShip,
+    DATEPART(YEAR, OrderDate)   AS OrderYear,
+    EOMONTH(GETDATE())          AS EndOfMonth,
+    FORMAT(OrderDate, 'yyyy-MM-dd') AS Formatted;
+
+-- Filter by date range (sargable!)
+WHERE OrderDate >= '2024-01-01' AND OrderDate < '2025-01-01'
+-- NOT: WHERE YEAR(OrderDate) = 2024 (non-sargable!)
+```
+
 ### varchar vs nvarchar — Critical Distinction
 
 ```

@@ -50,6 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
     { id: '14', filename: '14-mock-interview-guide.md', title: 'Mock Interview', icon: '🎤', bgImage: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80' },
     { id: '15', filename: '15-ai-tools-and-agents.md', title: 'AI Tools & Agents', icon: '🤖', bgImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80' },
     { id: '16', filename: '16-entity-framework-core.md', title: 'Entity Framework', icon: '🔌', bgImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&q=80' },
+    { id: '17', filename: '17-javascript.md', title: 'JavaScript', icon: '🟨', bgImage: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=600&q=80' },
   ];
 
   private readonly STORAGE_KEY = 'interview-prep-tracker';
