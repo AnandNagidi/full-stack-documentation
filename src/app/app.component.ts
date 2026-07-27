@@ -12,6 +12,7 @@ interface DocItem {
   filename: string;
   title: string;
   icon: string;
+  bgImage: string;
 }
 
 interface TrackerEntry {
@@ -33,22 +34,22 @@ interface TrackerData {
 })
 export class AppComponent implements OnInit, OnDestroy {
   documents: DocItem[] = [
-    { id: '01', filename: '01-dotnet-core.md', title: '.NET Core / .NET 8', icon: '🟣' },
-    { id: '02', filename: '02-csharp-advanced.md', title: 'C# Advanced', icon: '💜' },
-    { id: '03', filename: '03-angular.md', title: 'Angular', icon: '🔴' },
-    { id: '04', filename: '04-sql-server.md', title: 'SQL Server', icon: '🗄️' },
-    { id: '05', filename: '05-microservices.md', title: 'Microservices', icon: '🔗' },
-    { id: '06', filename: '06-oops-concepts.md', title: 'OOP Concepts', icon: '🧱' },
-    { id: '07', filename: '07-solid-principles.md', title: 'SOLID Principles', icon: '📐' },
-    { id: '08', filename: '08-design-patterns.md', title: 'Design Patterns', icon: '🏗️' },
-    { id: '09', filename: '09-azure-cloud.md', title: 'Azure Cloud', icon: '☁️' },
-    { id: '10', filename: '10-system-design.md', title: 'System Design', icon: '🏛️' },
-    { id: '11', filename: '11-preparation-roadmap.md', title: 'Preparation Roadmap', icon: '🗺️' },
-    { id: '12', filename: '12-quick-revision-notes.md', title: 'Quick Revision', icon: '⚡' },
-    { id: '13', filename: '13-top-100-questions.md', title: 'Top 100 Questions', icon: '💯' },
-    { id: '14', filename: '14-mock-interview-guide.md', title: 'Mock Interview', icon: '🎤' },
-    { id: '15', filename: '15-ai-tools-and-agents.md', title: 'AI Tools & Agents', icon: '🤖' },
-    { id: '16', filename: '16-entity-framework-core.md', title: 'Entity Framework', icon: '🔌' },
+    { id: '01', filename: '01-dotnet-core.md', title: '.NET Core / .NET 8', icon: '🟣', bgImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&q=80' },
+    { id: '02', filename: '02-csharp-advanced.md', title: 'C# Advanced', icon: '💜', bgImage: 'https://images.unsplash.com/photo-1515879218367-8466d910auj9?w=600&q=80' },
+    { id: '03', filename: '03-angular.md', title: 'Angular', icon: '🔴', bgImage: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=600&q=80' },
+    { id: '04', filename: '04-sql-server.md', title: 'SQL Server', icon: '🗄️', bgImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=600&q=80' },
+    { id: '05', filename: '05-microservices.md', title: 'Microservices', icon: '🔗', bgImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80' },
+    { id: '06', filename: '06-oops-concepts.md', title: 'OOP Concepts', icon: '🧱', bgImage: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=600&q=80' },
+    { id: '07', filename: '07-solid-principles.md', title: 'SOLID Principles', icon: '📐', bgImage: 'https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=600&q=80' },
+    { id: '08', filename: '08-design-patterns.md', title: 'Design Patterns', icon: '🏗️', bgImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=600&q=80' },
+    { id: '09', filename: '09-azure-cloud.md', title: 'Azure Cloud', icon: '☁️', bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80' },
+    { id: '10', filename: '10-system-design.md', title: 'System Design', icon: '🏛️', bgImage: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80' },
+    { id: '11', filename: '11-preparation-roadmap.md', title: 'Preparation Roadmap', icon: '🗺️', bgImage: 'https://images.unsplash.com/photo-1476304884326-cd2c88572c5f?w=600&q=80' },
+    { id: '12', filename: '12-quick-revision-notes.md', title: 'Quick Revision', icon: '⚡', bgImage: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=600&q=80' },
+    { id: '13', filename: '13-top-100-questions.md', title: 'Top 100 Questions', icon: '💯', bgImage: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80' },
+    { id: '14', filename: '14-mock-interview-guide.md', title: 'Mock Interview', icon: '🎤', bgImage: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80' },
+    { id: '15', filename: '15-ai-tools-and-agents.md', title: 'AI Tools & Agents', icon: '🤖', bgImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80' },
+    { id: '16', filename: '16-entity-framework-core.md', title: 'Entity Framework', icon: '🔌', bgImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&q=80' },
   ];
 
   private readonly STORAGE_KEY = 'interview-prep-tracker';

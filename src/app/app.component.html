@@ -74,25 +74,22 @@
         <div class="progress-fill" [style.width.%]="overallProgress()"></div>
       </div>
       <span class="progress-percent">{{ overallProgress() }}%</span>
-    </div>
-
-    <!-- Course Search -->
-    <div class="course-search">
-      <input
-        type="text"
-        class="course-search-input"
-        placeholder="🔍 Search courses... (e.g. angular, sql, design)"
-        [ngModel]="courseSearchTerm()"
-        (ngModelChange)="courseSearchTerm.set($event)"
-      />
-      @if (courseSearchTerm()) {
-        <span class="course-search-count">{{ filteredDocuments().length }} of {{ documents.length }}</span>
-      }
+      <!-- Course Search (compact, right side) -->
+      <div class="course-search">
+        <input
+          type="text"
+          class="course-search-input"
+          placeholder="🔍 Filter..."
+          [ngModel]="courseSearchTerm()"
+          (ngModelChange)="courseSearchTerm.set($event)"
+        />
+      </div>
     </div>
 
     <div class="doc-grid">
       @for (doc of filteredDocuments(); track doc.id) {
-        <button class="doc-card" [class]="'doc-card status-' + getStatus(doc.id)" (click)="selectDocument(doc)">
+        <button class="doc-card" [class]="'doc-card status-' + getStatus(doc.id)" (click)="selectDocument(doc)"
+          [style.background-image]="'linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.92)), url(' + doc.bgImage + ')'">
           <div class="card-status-indicator" (click)="cycleStatus($event, doc.id)" title="Click to change status">
             @switch (getStatus(doc.id)) {
               @case ('completed') { <span class="status-dot">✅</span> }
@@ -124,7 +121,8 @@
 
   <!-- Document Content -->
   @if (selectedDoc()) {
-    <div class="doc-content">
+    <div class="doc-content"
+      [style.background-image]="'linear-gradient(rgba(255,255,255,0.94), rgba(255,255,255,0.96)), url(' + selectedDoc()!.bgImage + ')'">
       @if (isLoading()) {
         <div class="loading">Loading...</div>
       } @else {
