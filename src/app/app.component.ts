@@ -35,7 +35,7 @@ interface TrackerData {
 export class AppComponent implements OnInit, OnDestroy {
   documents: DocItem[] = [
     { id: '01', filename: '01-dotnet-core.md', title: '.NET Core / .NET 8', icon: '🟣', bgImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&q=80' },
-    { id: '02', filename: '02-csharp-advanced.md', title: 'C# Advanced', icon: '💜', bgImage: 'https://images.unsplash.com/photo-1515879218367-8466d910auj9?w=600&q=80' },
+    { id: '02', filename: '02-csharp-advanced.md', title: 'C# Advanced', icon: '💜', bgImage: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=600&q=80' },
     { id: '03', filename: '03-angular.md', title: 'Angular', icon: '🔴', bgImage: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=600&q=80' },
     { id: '04', filename: '04-sql-server.md', title: 'SQL Server', icon: '🗄️', bgImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=600&q=80' },
     { id: '05', filename: '05-microservices.md', title: 'Microservices', icon: '🔗', bgImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80' },
