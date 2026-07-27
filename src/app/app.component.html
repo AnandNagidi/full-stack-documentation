@@ -13,30 +13,81 @@
         }
       </h1>
     </div>
-    @if (selectedDoc()) {
-      <div class="search-container">
-        <input
-          type="text"
-          class="search-input"
-          placeholder="Search in document..."
-          [ngModel]="searchTerm()"
-          (ngModelChange)="onSearch($event)"
-        />
-        @if (matchCount() > 0) {
-          <span class="match-count">{{ matchCount() }} matches</span>
-        }
-      </div>
-    }
+    <div class="header-right">
+      @if (selectedDoc()) {
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search in document..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearch($event)"
+          />
+          @if (matchCount() > 0) {
+            <span class="match-count">{{ matchCount() }} matches</span>
+          }
+        </div>
+        <!-- Status controls in doc view -->
+        <div class="status-controls">
+          <button
+            class="status-btn"
+            [class.active]="getStatus(selectedDoc()!.id) === 'in-progress'"
+            (click)="markAsStatus('in-progress')">
+            📖 In Progress
+          </button>
+          <button
+            class="status-btn completed"
+            [class.active]="getStatus(selectedDoc()!.id) === 'completed'"
+            (click)="markAsStatus('completed')">
+            ✅ Completed
+          </button>
+        </div>
+      } @else {
+        <!-- Progress summary on home -->
+        <div class="progress-summary">
+          <span class="progress-text">
+            {{ completedCount() }}/{{ documents.length }} completed
+          </span>
+          <div class="progress-bar-mini">
+            <div class="progress-fill" [style.width.%]="overallProgress()"></div>
+          </div>
+          <button class="reset-btn" (click)="resetTracker()" title="Reset all progress">🔄</button>
+        </div>
+      }
+    </div>
   </header>
 
   <!-- Document Grid (Home) -->
   @if (!selectedDoc()) {
+    <!-- Overall Progress Bar -->
+    <div class="overall-progress">
+      <div class="progress-stats">
+        <span class="stat">✅ {{ completedCount() }} Completed</span>
+        <span class="stat">📖 {{ inProgressCount() }} In Progress</span>
+        <span class="stat">📋 {{ documents.length - completedCount() - inProgressCount() }} Remaining</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="overallProgress()"></div>
+      </div>
+      <span class="progress-percent">{{ overallProgress() }}%</span>
+    </div>
+
     <div class="doc-grid">
       @for (doc of documents; track doc.id) {
-        <button class="doc-card" (click)="selectDocument(doc)">
+        <button class="doc-card" [class]="'doc-card status-' + getStatus(doc.id)" (click)="selectDocument(doc)">
+          <div class="card-status-indicator" (click)="cycleStatus($event, doc.id)" title="Click to change status">
+            @switch (getStatus(doc.id)) {
+              @case ('completed') { <span class="status-dot completed">✅</span> }
+              @case ('in-progress') { <span class="status-dot in-progress">📖</span> }
+              @default { <span class="status-dot not-started">⬜</span> }
+            }
+          </div>
           <span class="doc-icon">{{ doc.icon }}</span>
           <span class="doc-number">{{ doc.id }}</span>
           <span class="doc-title">{{ doc.title }}</span>
+          @if (getLastVisited(doc.id)) {
+            <span class="last-visited">Last: {{ getLastVisited(doc.id) | date:'shortDate' }}</span>
+          }
         </button>
       }
     </div>
