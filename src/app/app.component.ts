@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -14,11 +14,14 @@ interface DocItem {
   icon: string;
 }
 
+interface TrackerEntry {
+  status: ProgressStatus;
+  lastVisited?: string;
+  readProgress: number; // 0-100 percentage scrolled
+}
+
 interface TrackerData {
-  [docId: string]: {
-    status: ProgressStatus;
-    lastVisited?: string;
-  };
+  [docId: string]: TrackerEntry;
 }
 
 @Component({
@@ -28,7 +31,7 @@ interface TrackerData {
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   documents: DocItem[] = [
     { id: '01', filename: '01-dotnet-core.md', title: '.NET Core / .NET 8', icon: '🟣' },
     { id: '02', filename: '02-csharp-advanced.md', title: 'C# Advanced', icon: '💜' },
@@ -49,6 +52,7 @@ export class AppComponent implements OnInit {
   ];
 
   private readonly STORAGE_KEY = 'interview-prep-tracker';
+  private scrollHandler: (() => void) | null = null;
 
   selectedDoc = signal<DocItem | null>(null);
   rawContent = signal<string>('');
@@ -57,21 +61,19 @@ export class AppComponent implements OnInit {
   isLoading = signal<boolean>(false);
   matchCount = signal<number>(0);
   tracker = signal<TrackerData>({});
+  currentReadProgress = signal<number>(0);
 
-  // Computed stats
-  completedCount = computed(() => {
-    const t = this.tracker();
-    return Object.values(t).filter(v => v.status === 'completed').length;
-  });
+  completedCount = computed(() =>
+    Object.values(this.tracker()).filter(v => v.status === 'completed').length
+  );
 
-  inProgressCount = computed(() => {
-    const t = this.tracker();
-    return Object.values(t).filter(v => v.status === 'in-progress').length;
-  });
+  inProgressCount = computed(() =>
+    Object.values(this.tracker()).filter(v => v.status === 'in-progress').length
+  );
 
-  overallProgress = computed(() => {
-    return Math.round((this.completedCount() / this.documents.length) * 100);
-  });
+  overallProgress = computed(() =>
+    Math.round((this.completedCount() / this.documents.length) * 100)
+  );
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
 
@@ -79,8 +81,16 @@ export class AppComponent implements OnInit {
     this.loadTracker();
   }
 
+  ngOnDestroy(): void {
+    this.detachScrollListener();
+  }
+
   getStatus(docId: string): ProgressStatus {
     return this.tracker()[docId]?.status || 'not-started';
+  }
+
+  getReadProgress(docId: string): number {
+    return this.tracker()[docId]?.readProgress || 0;
   }
 
   getLastVisited(docId: string): string | null {
@@ -93,7 +103,6 @@ export class AppComponent implements OnInit {
     const next: ProgressStatus =
       current === 'not-started' ? 'in-progress' :
       current === 'in-progress' ? 'completed' : 'not-started';
-
     this.updateStatus(docId, next);
   }
 
@@ -109,12 +118,11 @@ export class AppComponent implements OnInit {
     this.isLoading.set(true);
     this.searchTerm.set('');
     this.matchCount.set(0);
+    this.currentReadProgress.set(this.getReadProgress(doc.id));
 
-    // Update last visited
     const t = { ...this.tracker() };
-    if (!t[doc.id]) t[doc.id] = { status: 'not-started' };
+    if (!t[doc.id]) t[doc.id] = { status: 'not-started', readProgress: 0 };
     t[doc.id].lastVisited = new Date().toISOString();
-    // Auto-mark as in-progress if not started
     if (t[doc.id].status === 'not-started') {
       t[doc.id].status = 'in-progress';
     }
@@ -126,6 +134,7 @@ export class AppComponent implements OnInit {
         this.rawContent.set(content);
         this.renderMarkdown(content);
         this.isLoading.set(false);
+        setTimeout(() => this.attachScrollListener(), 200);
       },
       error: () => {
         this.rawContent.set('Failed to load document.');
@@ -136,6 +145,7 @@ export class AppComponent implements OnInit {
   }
 
   goBack(): void {
+    this.detachScrollListener();
     this.selectedDoc.set(null);
     this.rawContent.set('');
     this.renderedHtml.set('');
@@ -160,10 +170,56 @@ export class AppComponent implements OnInit {
     }
   }
 
+  private attachScrollListener(): void {
+    this.detachScrollListener();
+    const contentEl = document.querySelector('.doc-content');
+    if (!contentEl) return;
+
+    this.scrollHandler = () => {
+      const el = contentEl as HTMLElement;
+      const scrollTop = el.scrollTop;
+      const scrollHeight = el.scrollHeight - el.clientHeight;
+      if (scrollHeight <= 0) return;
+
+      const percent = Math.min(100, Math.round((scrollTop / scrollHeight) * 100));
+      const doc = this.selectedDoc();
+      if (!doc) return;
+
+      // Only update if new progress is higher than stored
+      const currentStored = this.getReadProgress(doc.id);
+      if (percent > currentStored) {
+        this.currentReadProgress.set(percent);
+        const t = { ...this.tracker() };
+        if (!t[doc.id]) t[doc.id] = { status: 'in-progress', readProgress: 0 };
+        t[doc.id].readProgress = percent;
+        // Auto-complete if scrolled to bottom
+        if (percent >= 95 && t[doc.id].status !== 'completed') {
+          t[doc.id].status = 'completed';
+        }
+        this.tracker.set(t);
+        this.saveTracker();
+      }
+    };
+
+    contentEl.addEventListener('scroll', this.scrollHandler, { passive: true });
+  }
+
+  private detachScrollListener(): void {
+    if (this.scrollHandler) {
+      const contentEl = document.querySelector('.doc-content');
+      if (contentEl) {
+        contentEl.removeEventListener('scroll', this.scrollHandler);
+      }
+      this.scrollHandler = null;
+    }
+  }
+
   private updateStatus(docId: string, status: ProgressStatus): void {
     const t = { ...this.tracker() };
-    if (!t[docId]) t[docId] = { status: 'not-started' };
+    if (!t[docId]) t[docId] = { status: 'not-started', readProgress: 0 };
     t[docId].status = status;
+    if (status === 'completed') t[docId].readProgress = 100;
+    if (status === 'not-started') t[docId].readProgress = 0;
     this.tracker.set(t);
     this.saveTracker();
   }
@@ -171,10 +227,8 @@ export class AppComponent implements OnInit {
   private loadTracker(): void {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        this.tracker.set(JSON.parse(stored));
-      }
-    } catch { /* ignore parse errors */ }
+      if (stored) this.tracker.set(JSON.parse(stored));
+    } catch {}
   }
 
   private saveTracker(): void {
@@ -193,12 +247,9 @@ export class AppComponent implements OnInit {
     this.matchCount.set(matches ? matches.length : 0);
     const highlighted = html.replace(regex, '<mark class="search-highlight">$1</mark>');
     this.renderedHtml.set(this.sanitizer.bypassSecurityTrustHtml(highlighted));
-
     setTimeout(() => {
       const firstMatch = document.querySelector('.search-highlight');
-      if (firstMatch) {
-        firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      if (firstMatch) firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   }
 

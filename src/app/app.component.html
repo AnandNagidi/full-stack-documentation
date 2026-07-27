@@ -27,23 +27,21 @@
             <span class="match-count">{{ matchCount() }} matches</span>
           }
         </div>
-        <!-- Status controls in doc view -->
         <div class="status-controls">
           <button
             class="status-btn"
             [class.active]="getStatus(selectedDoc()!.id) === 'in-progress'"
             (click)="markAsStatus('in-progress')">
-            📖 In Progress
+            📖 Reading
           </button>
           <button
             class="status-btn completed"
             [class.active]="getStatus(selectedDoc()!.id) === 'completed'"
             (click)="markAsStatus('completed')">
-            ✅ Completed
+            ✅ Done
           </button>
         </div>
       } @else {
-        <!-- Progress summary on home -->
         <div class="progress-summary">
           <span class="progress-text">
             {{ completedCount() }}/{{ documents.length }} completed
@@ -57,14 +55,20 @@
     </div>
   </header>
 
+  <!-- Reading Progress Bar (when viewing a doc) -->
+  @if (selectedDoc()) {
+    <div class="reading-progress-bar">
+      <div class="reading-progress-fill" [style.width.%]="currentReadProgress()"></div>
+    </div>
+  }
+
   <!-- Document Grid (Home) -->
   @if (!selectedDoc()) {
-    <!-- Overall Progress Bar -->
     <div class="overall-progress">
       <div class="progress-stats">
-        <span class="stat">✅ {{ completedCount() }} Completed</span>
-        <span class="stat">📖 {{ inProgressCount() }} In Progress</span>
-        <span class="stat">📋 {{ documents.length - completedCount() - inProgressCount() }} Remaining</span>
+        <span class="stat completed-stat">✅ {{ completedCount() }} Completed</span>
+        <span class="stat inprogress-stat">📖 {{ inProgressCount() }} In Progress</span>
+        <span class="stat remaining-stat">📋 {{ documents.length - completedCount() - inProgressCount() }} Remaining</span>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" [style.width.%]="overallProgress()"></div>
@@ -77,16 +81,27 @@
         <button class="doc-card" [class]="'doc-card status-' + getStatus(doc.id)" (click)="selectDocument(doc)">
           <div class="card-status-indicator" (click)="cycleStatus($event, doc.id)" title="Click to change status">
             @switch (getStatus(doc.id)) {
-              @case ('completed') { <span class="status-dot completed">✅</span> }
-              @case ('in-progress') { <span class="status-dot in-progress">📖</span> }
-              @default { <span class="status-dot not-started">⬜</span> }
+              @case ('completed') { <span class="status-dot">✅</span> }
+              @case ('in-progress') { <span class="status-dot">📖</span> }
+              @default { <span class="status-dot">⬜</span> }
             }
           </div>
           <span class="doc-icon">{{ doc.icon }}</span>
           <span class="doc-number">{{ doc.id }}</span>
           <span class="doc-title">{{ doc.title }}</span>
+          <!-- Per-course progress bar -->
+          <div class="card-progress">
+            <div class="card-progress-bar">
+              <div
+                class="card-progress-fill"
+                [class.complete]="getReadProgress(doc.id) >= 95"
+                [style.width.%]="getReadProgress(doc.id)">
+              </div>
+            </div>
+            <span class="card-progress-text">{{ getReadProgress(doc.id) }}%</span>
+          </div>
           @if (getLastVisited(doc.id)) {
-            <span class="last-visited">Last: {{ getLastVisited(doc.id) | date:'shortDate' }}</span>
+            <span class="last-visited">{{ getLastVisited(doc.id) | date:'shortDate' }}</span>
           }
         </button>
       }

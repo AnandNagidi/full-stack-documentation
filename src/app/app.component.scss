@@ -226,6 +226,55 @@
     color: #999;
     margin-top: 4px;
   }
+
+  .card-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 0 8px;
+    margin-top: 4px;
+
+    .card-progress-bar {
+      flex: 1;
+      height: 5px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+
+      .card-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff9800, #f57c00);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+
+        &.complete {
+          background: linear-gradient(90deg, #4caf50, #2e7d32);
+        }
+      }
+    }
+
+    .card-progress-text {
+      font-size: 0.65rem;
+      color: #888;
+      font-weight: 600;
+      min-width: 28px;
+      text-align: right;
+    }
+  }
+}
+
+// Reading Progress Bar (top of doc view)
+.reading-progress-bar {
+  height: 4px;
+  background: #e0e0e0;
+  width: 100%;
+
+  .reading-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1a237e, #4caf50);
+    transition: width 0.2s ease;
+  }
 }
 
 // Overall Progress
