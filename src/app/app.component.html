@@ -1,0 +1,55 @@
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      @if (selectedDoc()) {
+        <button class="back-btn" (click)="goBack()">← Back</button>
+      }
+      <h1 class="app-title">
+        @if (selectedDoc()) {
+          {{ selectedDoc()!.icon }} {{ selectedDoc()!.title }}
+        } @else {
+          📚 Interview Prep Guide
+        }
+      </h1>
+    </div>
+    @if (selectedDoc()) {
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search in document..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+        />
+        @if (matchCount() > 0) {
+          <span class="match-count">{{ matchCount() }} matches</span>
+        }
+      </div>
+    }
+  </header>
+
+  <!-- Document Grid (Home) -->
+  @if (!selectedDoc()) {
+    <div class="doc-grid">
+      @for (doc of documents; track doc.id) {
+        <button class="doc-card" (click)="selectDocument(doc)">
+          <span class="doc-icon">{{ doc.icon }}</span>
+          <span class="doc-number">{{ doc.id }}</span>
+          <span class="doc-title">{{ doc.title }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Document Content -->
+  @if (selectedDoc()) {
+    <div class="doc-content">
+      @if (isLoading()) {
+        <div class="loading">Loading...</div>
+      } @else {
+        <article class="markdown-body" [innerHTML]="renderedHtml()"></article>
+      }
+    </div>
+  }
+</div>
