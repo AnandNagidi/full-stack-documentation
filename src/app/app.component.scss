@@ -618,3 +618,172 @@ mark.search-highlight {
   border-radius: 2px;
   box-shadow: 0 0 0 1px #fbc02d;
 }
+
+// ===== RESPONSIVE - TABLET (768px) =====
+@media (max-width: 768px) {
+  .hero-banner {
+    height: 240px;
+
+    .hero-overlay { padding: 16px 20px; }
+
+    .hero-top {
+      .hero-logo { font-size: 1.1rem; }
+      .hero-nav {
+        gap: 12px;
+        .nav-item { font-size: 0.75rem; letter-spacing: 0.5px; }
+      }
+    }
+
+    .hero-center {
+      .hero-title { font-size: 2rem; margin-bottom: 10px; }
+      .hero-search-input {
+        width: 240px;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        &:focus { width: 280px; }
+      }
+    }
+
+    .days-tracker {
+      gap: 10px;
+      .days-info {
+        padding: 3px 8px;
+        .days-elapsed { font-size: 0.75rem; }
+        .days-remaining { font-size: 0.7rem; }
+      }
+    }
+  }
+
+  .cards-section { padding: 20px; }
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .course-card .card-image { height: 130px; }
+
+  .doc-header {
+    padding: 8px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .doc-title { font-size: 1rem; }
+    .doc-header-right { width: 100%; justify-content: space-between; }
+    .search-container .search-input { width: 140px; }
+  }
+
+  .doc-content { padding: 20px 24px; }
+  .markdown-body {
+    pre { font-size: 0.8rem; padding: 12px; }
+    table { font-size: 0.8rem; display: block; overflow-x: auto; }
+  }
+
+  .notes-overlay {
+    padding: 12px;
+    .notes-panel { max-height: 90vh; }
+    .notes-input-area {
+      flex-direction: column;
+      .notes-textarea { height: 50px; }
+    }
+  }
+}
+
+// ===== RESPONSIVE - MOBILE (480px) =====
+@media (max-width: 480px) {
+  .hero-banner {
+    height: 220px;
+
+    .hero-overlay { padding: 12px 14px; }
+
+    .hero-top {
+      .hero-logo { font-size: 1rem; }
+      .hero-nav {
+        gap: 8px;
+        .nav-item { font-size: 0.65rem; }
+        .reset-link { padding: 2px 8px; font-size: 0.65rem; }
+      }
+    }
+
+    .hero-center {
+      .hero-title { font-size: 1.5rem; margin-bottom: 8px; }
+      .hero-search-input {
+        width: 200px;
+        font-size: 0.8rem;
+        padding: 8px 14px;
+        &:focus { width: 220px; }
+      }
+    }
+
+    .days-tracker {
+      flex-direction: column;
+      gap: 6px;
+      align-items: stretch;
+      .days-info { justify-content: center; }
+    }
+  }
+
+  .cards-section { padding: 12px; }
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .course-card {
+    .card-image { height: 120px; }
+    .card-body { padding: 10px 12px; }
+  }
+
+  .doc-header {
+    padding: 8px 12px;
+    .doc-header-left { gap: 8px; }
+    .doc-title { font-size: 0.9rem; }
+    .back-btn { padding: 4px 8px; font-size: 0.8rem; }
+    .search-container .search-input { width: 110px; font-size: 0.8rem; }
+    .status-controls .status-btn { padding: 3px 6px; font-size: 0.8rem; }
+  }
+
+  .doc-content {
+    padding: 14px 16px;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .markdown-body {
+    font-size: 0.9rem;
+    line-height: 1.6;
+
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.2rem; margin-top: 28px; }
+    h3 { font-size: 1.05rem; }
+
+    pre {
+      font-size: 0.75rem;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    table {
+      font-size: 0.7rem;
+      th, td { padding: 4px 6px; }
+    }
+  }
+
+  .notes-overlay {
+    padding: 8px;
+    align-items: flex-end;
+
+    .notes-panel {
+      max-height: 95vh;
+      border-radius: 12px 12px 0 0;
+    }
+    .notes-header { padding: 12px 16px; }
+    .notes-input-area { padding: 12px 16px; }
+    .notes-list { padding: 12px 16px; }
+  }
+
+  .days-settings-overlay .days-settings {
+    min-width: auto;
+    width: calc(100% - 32px);
+    margin: 0 16px;
+  }
+}
