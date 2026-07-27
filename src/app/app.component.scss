@@ -264,6 +264,38 @@
   }
 }
 
+// Course Search
+.course-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 32px;
+  margin: 0 32px;
+
+  .course-search-input {
+    flex: 1;
+    padding: 10px 18px;
+    border: 1px solid #e0e0e0;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    outline: none;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: #1a237e;
+      box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+    }
+  }
+
+  .course-search-count {
+    font-size: 0.8rem;
+    color: #666;
+    white-space: nowrap;
+  }
+}
+
 // Reading Progress Bar (top of doc view)
 .reading-progress-bar {
   height: 4px;

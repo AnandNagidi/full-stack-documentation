@@ -62,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
   matchCount = signal<number>(0);
   tracker = signal<TrackerData>({});
   currentReadProgress = signal<number>(0);
+  courseSearchTerm = signal<string>('');
 
   completedCount = computed(() =>
     Object.values(this.tracker()).filter(v => v.status === 'completed').length
@@ -74,6 +75,16 @@ export class AppComponent implements OnInit, OnDestroy {
   overallProgress = computed(() =>
     Math.round((this.completedCount() / this.documents.length) * 100)
   );
+
+  filteredDocuments = computed(() => {
+    const term = this.courseSearchTerm().toLowerCase().trim();
+    if (!term) return this.documents;
+    return this.documents.filter(d =>
+      d.title.toLowerCase().includes(term) ||
+      d.id.includes(term) ||
+      d.filename.toLowerCase().includes(term)
+    );
+  });
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
 

@@ -76,8 +76,22 @@
       <span class="progress-percent">{{ overallProgress() }}%</span>
     </div>
 
+    <!-- Course Search -->
+    <div class="course-search">
+      <input
+        type="text"
+        class="course-search-input"
+        placeholder="🔍 Search courses... (e.g. angular, sql, design)"
+        [ngModel]="courseSearchTerm()"
+        (ngModelChange)="courseSearchTerm.set($event)"
+      />
+      @if (courseSearchTerm()) {
+        <span class="course-search-count">{{ filteredDocuments().length }} of {{ documents.length }}</span>
+      }
+    </div>
+
     <div class="doc-grid">
-      @for (doc of documents; track doc.id) {
+      @for (doc of filteredDocuments(); track doc.id) {
         <button class="doc-card" [class]="'doc-card status-' + getStatus(doc.id)" (click)="selectDocument(doc)">
           <div class="card-status-indicator" (click)="cycleStatus($event, doc.id)" title="Click to change status">
             @switch (getStatus(doc.id)) {
