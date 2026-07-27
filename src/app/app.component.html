@@ -69,7 +69,6 @@
               <div class="card-image-overlay">
                 <span class="card-icon">{{ doc.icon }}</span>
               </div>
-              <!-- Status badge -->
               <div class="card-badge" (click)="cycleStatus($event, doc.id)">
                 @switch (getStatus(doc.id)) {
                   @case ('completed') { <span class="badge completed">✅</span> }
@@ -81,11 +80,7 @@
             <div class="card-body">
               <h3 class="card-title">{{ doc.title }}</h3>
               <div class="card-progress-bar">
-                <div
-                  class="card-progress-fill"
-                  [class.complete]="getReadProgress(doc.id) >= 95"
-                  [style.width.%]="getReadProgress(doc.id)">
-                </div>
+                <div class="card-progress-fill" [class.complete]="getReadProgress(doc.id) >= 95" [style.width.%]="getReadProgress(doc.id)"></div>
               </div>
               <div class="card-meta">
                 <span class="card-progress-text">{{ getReadProgress(doc.id) }}% read</span>
@@ -96,8 +91,57 @@
             </div>
           </div>
         }
+
+        <!-- New Questions Tile -->
+        <div class="course-card notes-card" (click)="openNotes()">
+          <div class="card-image notes-image">
+            <div class="card-image-overlay">
+              <span class="card-icon">📝</span>
+            </div>
+            <div class="notes-count">{{ userNotes().length }}</div>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">New Questions</h3>
+            <div class="card-meta">
+              <span class="card-progress-text">{{ userNotes().length }} questions saved</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
+
+    <!-- Notes Editor View (overlay) -->
+    @if (showNotesView()) {
+      <div class="notes-overlay">
+        <div class="notes-panel">
+          <div class="notes-header">
+            <h2>📝 New Questions</h2>
+            <button class="notes-close" (click)="closeNotes()">✕</button>
+          </div>
+          <div class="notes-input-area">
+            <textarea
+              class="notes-textarea"
+              placeholder="Type a new interview question or note..."
+              [ngModel]="newNoteText()"
+              (ngModelChange)="newNoteText.set($event)"
+              (keydown.control.enter)="addNote()"
+            ></textarea>
+            <button class="notes-add-btn" (click)="addNote()">+ Add</button>
+          </div>
+          <div class="notes-list">
+            @for (note of userNotes(); track $index; let i = $index) {
+              <div class="note-item">
+                <span class="note-number">{{ i + 1 }}.</span>
+                <p class="note-text">{{ note }}</p>
+                <button class="note-delete" (click)="deleteNote(i)" title="Delete">🗑️</button>
+              </div>
+            } @empty {
+              <p class="notes-empty">No questions yet. Add your first one above!</p>
+            }
+          </div>
+        </div>
+      </div>
+    }
   }
 
   <!-- Document Reading View -->

@@ -54,6 +54,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private readonly STORAGE_KEY = 'interview-prep-tracker';
   private readonly DAYS_TRACKER_KEY = 'interview-prep-days';
+  private readonly NOTES_KEY = 'interview-prep-notes';
   private scrollHandler: (() => void) | null = null;
 
   // Days tracker
@@ -68,6 +69,9 @@ export class AppComponent implements OnInit, OnDestroy {
   daysRemaining = computed(() => Math.max(0, this.totalDays() - this.daysElapsed()));
   daysProgress = computed(() => Math.min(100, Math.round((this.daysElapsed() / this.totalDays()) * 100)));
   showDaysSettings = signal<boolean>(false);
+  showNotesView = signal<boolean>(false);
+  userNotes = signal<string[]>([]);
+  newNoteText = signal<string>('');
 
   selectedDoc = signal<DocItem | null>(null);
   rawContent = signal<string>('');
@@ -106,6 +110,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadTracker();
     this.loadDaysTracker();
+    this.loadNotes();
   }
 
   ngOnDestroy(): void {
@@ -260,6 +265,41 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private saveTracker(): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tracker()));
+  }
+
+  openNotes(): void {
+    this.showNotesView.set(true);
+    this.loadNotes();
+  }
+
+  closeNotes(): void {
+    this.showNotesView.set(false);
+  }
+
+  addNote(): void {
+    const text = this.newNoteText().trim();
+    if (!text) return;
+    const notes = [...this.userNotes(), text];
+    this.userNotes.set(notes);
+    this.newNoteText.set('');
+    this.saveNotes();
+  }
+
+  deleteNote(index: number): void {
+    const notes = this.userNotes().filter((_, i) => i !== index);
+    this.userNotes.set(notes);
+    this.saveNotes();
+  }
+
+  private loadNotes(): void {
+    try {
+      const stored = localStorage.getItem(this.NOTES_KEY);
+      if (stored) this.userNotes.set(JSON.parse(stored));
+    } catch {}
+  }
+
+  private saveNotes(): void {
+    localStorage.setItem(this.NOTES_KEY, JSON.stringify(this.userNotes()));
   }
 
   toggleDaysSettings(): void {
